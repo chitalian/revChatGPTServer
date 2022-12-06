@@ -16,16 +16,23 @@ class Item(BaseModel):
 with open("config.json", "r") as f:
         config = json.load(f)
 chatbot = Chatbot(config)
-@app.get("/")
+@app.post("/")
 async def read_root(body: Item, response: Response):
 
-    if body.parent_id:
-        chatbot.parent_id = body.parent_id
-    if body.conversation_id:
-        chatbot.conversation_id = body.conversation_id
+    data ={
+        "action":"next",
+        "messages":[
+            {"id":str(chatbot.generate_uuid()),
+            "role":"user",
+            "content":{"content_type":"text","parts":[body.prompt]}
+        }],
+        "conversation_id": body.conversation_id if body.conversation_id else None,
+        "parent_message_id":body.parent_id if body.parent_id else chatbot.generate_uuid(),
+        "model":"text-davinci-002-render"
+    }
     
     try:
-        result = chatbot.get_chat_response(body.prompt, output="text")
+        result = chatbot.get_chat_text(data)
         if result:
             return {"response": result}
         else:
@@ -33,7 +40,7 @@ async def read_root(body: Item, response: Response):
     except Exception as e:
         chatbot.refresh_session()
         try: 
-            result = chatbot.get_chat_response(body.prompt, output="text")
+            result = chatbot.get_chat_text(data)
             if result:
                 return {"response": result}
             else:
