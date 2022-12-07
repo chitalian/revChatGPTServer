@@ -1,5 +1,9 @@
 # revChatGPTServer Fast API for chatGPT
 
+This server only contains one endpoint.
+<img src='fastApi.png' height='200' >
+[localhost:8000/docs](localhost:8000/docs)
+
 # Querying
 
 Querying a prompt
